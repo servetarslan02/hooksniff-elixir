@@ -3,63 +3,27 @@ defmodule HookSniff.Alerts do
 
   alias HookSniff.Client
 
-  @doc "List alert rules (paginated). Accepts `:limit` and `:offset` opts."
-  @spec list_rules(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
-  def list_rules(client, opts \\ []) do
-    path = build_query("/v1/alerts/rules", opts)
-    Client.request(:get, path, nil, client)
-  end
+  @doc "List alerts"
+  @spec list(HookSniff.t()) :: {:ok, map()} | {:error, term()}
+  def list(client), do: Client.request(:get, "/api/v1/alerts", nil, client)
 
-  @doc "List all alert rules (auto-paginate). Accepts `:limit` and `:max_pages` opts."
-  @spec list_all(HookSniff.t(), keyword()) :: {:ok, list()} | {:error, term()}
-  def list_all(client, opts \\ []) do
-    HookSniff.Pagination.collect_all(fn limit, offset ->
-      case list_rules(client, limit: limit, offset: offset) do
-        {:ok, %{status: status, body: body}} when status in 200..299 ->
-          parsed = if is_binary(body), do: Jason.decode!(body), else: body
-          {:ok, %{data: Map.get(parsed, "data", []), has_more: Map.get(parsed, "has_more", false)}}
-        {:ok, %{status: status, body: body}} ->
-          {:error, "HTTP #{status}: #{inspect(body)}"}
-        {:error, _} = err ->
-          err
-      end
-    end, opts)
-  end
+  @doc "Create an alert"
+  @spec create(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
+  def create(client, params), do: Client.request(:post, "/api/v1/alerts", params, client)
 
-  @doc "List alert notifications (paginated). Accepts `:limit` and `:offset` opts."
-  @spec list_notifications(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
-  def list_notifications(client, opts \\ []) do
-    path = build_query("/v1/alerts/notifications", opts)
-    Client.request(:get, path, nil, client)
-  end
+  @doc "Get an alert by ID"
+  @spec get(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
+  def get(client, id), do: Client.request(:get, "/api/v1/alerts/#{id}", nil, client)
 
-  @doc "List all alert notifications (auto-paginate). Accepts `:limit` and `:max_pages` opts."
-  @spec list_all_notifications(HookSniff.t(), keyword()) :: {:ok, list()} | {:error, term()}
-  def list_all_notifications(client, opts \\ []) do
-    HookSniff.Pagination.collect_all(fn limit, offset ->
-      case list_notifications(client, limit: limit, offset: offset) do
-        {:ok, %{status: status, body: body}} when status in 200..299 ->
-          parsed = if is_binary(body), do: Jason.decode!(body), else: body
-          {:ok, %{data: Map.get(parsed, "data", []), has_more: Map.get(parsed, "has_more", false)}}
-        {:ok, %{status: status, body: body}} ->
-          {:error, "HTTP #{status}: #{inspect(body)}"}
-        {:error, _} = err ->
-          err
-      end
-    end, opts)
-  end
+  @doc "Update an alert"
+  @spec update(HookSniff.t(), String.t(), map()) :: {:ok, map()} | {:error, term()}
+  def update(client, id, params), do: Client.request(:put, "/api/v1/alerts/#{id}", params, client)
 
-  defp build_query(path, opts) do
-    params = Enum.filter(opts, fn {_k, v} -> v != nil end)
+  @doc "Delete an alert"
+  @spec delete(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
+  def delete(client, id), do: Client.request(:delete, "/api/v1/alerts/#{id}", nil, client)
 
-    case params do
-      [] -> path
-      _ ->
-        query =
-          params
-          |> Enum.map(fn {k, v} -> "#{k}=#{URI.encode_www_form(to_string(v))}" end)
-          |> Enum.join("&")
-        "#{path}?#{query}"
-    end
-  end
+  @doc "Test an alert"
+  @spec test_alert(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
+  def test_alert(client, id), do: Client.request(:post, "/api/v1/alerts/#{id}/test", %{}, client)
 end

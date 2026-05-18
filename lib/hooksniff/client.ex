@@ -30,7 +30,7 @@ defmodule HookSniff.Client do
   Uses HTTPoison with retry logic and error handling.
   """
 
-  @user_agent "hooksniff-sdk/1.0.0/elixir"
+  @user_agent "hooksniff-sdk/1.2.0/elixir"
   @default_adapter HookSniff.DefaultHttpAdapter
 
   @doc """

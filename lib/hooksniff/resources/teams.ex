@@ -1,42 +1,37 @@
 defmodule HookSniff.Teams do
-  @moduledoc "Team management — members, invite, remove."
+  @moduledoc "Team management — list, create, members, invite, roles."
 
   alias HookSniff.Client
 
-  @doc "List team members (paginated). Accepts `:limit` and `:offset` opts."
-  @spec list_members(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
-  def list_members(client, opts \\ []) do
-    path = build_query("/v1/teams/members", opts)
-    Client.request(:get, path, nil, client)
-  end
+  @doc "List teams"
+  @spec list(HookSniff.t()) :: {:ok, map()} | {:error, term()}
+  def list(client), do: Client.request(:get, "/api/v1/teams", nil, client)
 
-  @doc "List all team members (auto-paginate). Accepts `:limit` and `:max_pages` opts."
-  @spec list_all_members(HookSniff.t(), keyword()) :: {:ok, list()} | {:error, term()}
-  def list_all_members(client, opts \\ []) do
-    HookSniff.Pagination.collect_all(fn limit, offset ->
-      list_members(client, limit: limit, offset: offset)
-    end, opts)
-  end
+  @doc "Create a team"
+  @spec create(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
+  def create(client, params), do: Client.request(:post, "/api/v1/teams", params, client)
 
-  @doc "Invite a team member"
-  @spec invite(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
-  def invite(client, params), do: Client.request(:post, "/v1/teams/invite", params, client)
+  @doc "Get a team by ID"
+  @spec get(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
+  def get(client, id), do: Client.request(:get, "/api/v1/teams/#{id}", nil, client)
 
-  @doc "Remove a team member"
-  @spec remove_member(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def remove_member(client, id), do: Client.request(:delete, "/v1/teams/members/#{id}", nil, client)
+  @doc "Accept a team invite"
+  @spec accept_invite(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
+  def accept_invite(client, params), do: Client.request(:post, "/api/v1/teams/accept-invite", params, client)
 
-  defp build_query(path, opts) do
-    params = Enum.filter(opts, fn {_k, v} -> v != nil end)
+  @doc "Invite a member"
+  @spec invite(HookSniff.t(), String.t(), map()) :: {:ok, map()} | {:error, term()}
+  def invite(client, team_id, params), do: Client.request(:post, "/api/v1/teams/#{team_id}/invite", params, client)
 
-    case params do
-      [] -> path
-      _ ->
-        query =
-          params
-          |> Enum.map(fn {k, v} -> "#{k}=#{URI.encode_www_form(to_string(v))}" end)
-          |> Enum.join("&")
-        "#{path}?#{query}"
-    end
-  end
+  @doc "List members"
+  @spec list_members(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
+  def list_members(client, team_id), do: Client.request(:get, "/api/v1/teams/#{team_id}/members", nil, client)
+
+  @doc "Remove a member"
+  @spec remove_member(HookSniff.t(), String.t(), String.t()) :: {:ok, map()} | {:error, term()}
+  def remove_member(client, team_id, user_id), do: Client.request(:delete, "/api/v1/teams/#{team_id}/members/#{user_id}", nil, client)
+
+  @doc "Change member role"
+  @spec change_role(HookSniff.t(), String.t(), String.t(), map()) :: {:ok, map()} | {:error, term()}
+  def change_role(client, team_id, user_id, params), do: Client.request(:put, "/api/v1/teams/#{team_id}/members/#{user_id}/role", params, client)
 end

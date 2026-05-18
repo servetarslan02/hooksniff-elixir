@@ -5,5 +5,5 @@ defmodule HookSniff.Health do
 
   @doc "Check API health"
   @spec check(HookSniff.t()) :: {:ok, map()} | {:error, term()}
-  def check(client), do: Client.request(:get, "/health", nil, client)
+  def check(client), do: Client.request(:get, "/api/v1/health", nil, client)
 end
