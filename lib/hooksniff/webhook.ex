@@ -32,7 +32,7 @@ defmodule HookSniff.Webhook do
 
     * `payload` — The raw request body (string)
     * `headers` — Map with `webhook-id`, `webhook-timestamp`, `webhook-signature` keys
-      (also accepts `svix-id`, `svix-timestamp`, `svix-signature`)
+      (also accepts `webhook-id`, `webhook-timestamp`, `webhook-signature`)
     * `secret` — The endpoint's signing secret (e.g., `"whsec_..."`)
 
   ## Returns
@@ -123,10 +123,7 @@ defmodule HookSniff.Webhook do
   end
 
   defp get_header(headers, name) do
-    # Support both svix- and webhook- prefixed headers
-    svix_name = String.replace(name, "webhook-", "svix-")
-
-    case Map.get(headers, name) || Map.get(headers, svix_name) do
+    case Map.get(headers, name) do
       nil -> {:error, %VerificationError{message: "Missing #{name} header"}}
       value -> {:ok, value}
     end
