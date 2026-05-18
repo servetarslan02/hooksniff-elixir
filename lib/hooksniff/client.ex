@@ -60,7 +60,22 @@ defmodule HookSniff.Client do
 
     all_headers = headers ++ content_type
 
-    do_request_with_retry(method, url, all_headers, body_str, client.num_retries, client.timeout, Map.get(client, :http_adapter, @default_adapter))
+    if Map.get(client, :debug, false) do
+      IO.puts("[HookSniff] → #{String.upcase(Atom.to_string(method))} #{url}")
+    end
+    startTime = System.monotonic_time(:millisecond)
+
+    result = do_request_with_retry(method, url, all_headers, body_str, client.num_retries, client.timeout, Map.get(client, :http_adapter, @default_adapter))
+
+    if Map.get(client, :debug, false) do
+      elapsed = System.monotonic_time(:millisecond) - startTime
+      case result do
+        {:ok, %{status: status}} -> IO.puts("[HookSniff] ← #{status} (#{elapsed}ms)")
+        _ -> :ok
+      end
+    end
+
+    result
   end
 
   @doc """
