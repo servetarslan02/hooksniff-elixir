@@ -5,33 +5,33 @@ defmodule HookSniff.Webhooks do
 
   @doc "Send a webhook"
   @spec send_webhook(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
-  def send_webhook(client, params), do: Client.request(:post, "/api/v1/msg", params, client)
+  def send_webhook(client, params), do: Client.request(:post, "/v1/msg", params, client)
 
   @doc "Get a message by ID"
   @spec get_message(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def get_message(client, id), do: Client.request(:get, "/api/v1/msg/#{id}", nil, client)
+  def get_message(client, id), do: Client.request(:get, "/v1/msg/#{id}", nil, client)
 
   @doc "List messages (paginated). Accepts `:limit` and `:offset` opts."
   @spec list_messages(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def list_messages(client, opts \\ []) do
-    path = build_query("/api/v1/msg", opts)
+    path = build_query("/v1/msg", opts)
     Client.request(:get, path, nil, client)
   end
 
   @doc "List webhook deliveries (paginated). Accepts `:limit` and `:offset` opts."
   @spec list(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def list(client, opts \\ []) do
-    path = build_query("/api/v1/webhooks", opts)
+    path = build_query("/v1/webhooks", opts)
     Client.request(:get, path, nil, client)
   end
 
   @doc "Get a webhook delivery by ID"
   @spec get(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def get(client, id), do: Client.request(:get, "/api/v1/webhooks/#{id}", nil, client)
+  def get(client, id), do: Client.request(:get, "/v1/webhooks/#{id}", nil, client)
 
   @doc "Replay a webhook delivery"
   @spec replay(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def replay(client, id), do: Client.request(:post, "/api/v1/webhooks/#{id}/replay", %{}, client)
+  def replay(client, id), do: Client.request(:post, "/v1/webhooks/#{id}/replay", %{}, client)
 
   defp build_query(path, opts) do
     params = Enum.filter(opts, fn {_k, v} -> v != nil end)

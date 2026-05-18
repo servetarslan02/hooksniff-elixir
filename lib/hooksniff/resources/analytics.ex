@@ -6,21 +6,21 @@ defmodule HookSniff.Analytics do
   @doc "Get delivery trend analytics"
   @spec deliveries(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
   def deliveries(client, params \\ %{}) do
-    path = build_query("/api/v1/analytics/deliveries", params)
+    path = build_query("/v1/analytics/deliveries", params)
     Client.request(:get, path, nil, client)
   end
 
   @doc "Get success rate analytics"
   @spec success_rate(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
   def success_rate(client, params \\ %{}) do
-    path = build_query("/api/v1/analytics/success-rate", params)
+    path = build_query("/v1/analytics/success-rate", params)
     Client.request(:get, path, nil, client)
   end
 
   @doc "Get latency trend analytics"
   @spec latency(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
   def latency(client, params \\ %{}) do
-    path = build_query("/api/v1/analytics/latency", params)
+    path = build_query("/v1/analytics/latency", params)
     Client.request(:get, path, nil, client)
   end
 

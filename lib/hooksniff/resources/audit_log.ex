@@ -6,13 +6,13 @@ defmodule HookSniff.AuditLog do
   @doc "List audit log entries"
   @spec list(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def list(client, opts \\ []) do
-    path = build_query("/api/v1/audit-log", opts)
+    path = build_query("/v1/audit-log", opts)
     Client.request(:get, path, nil, client)
   end
 
   @doc "Get an entry"
   @spec get(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def get(client, id), do: Client.request(:get, "/api/v1/audit-log/#{id}", nil, client)
+  def get(client, id), do: Client.request(:get, "/v1/audit-log/#{id}", nil, client)
 
   defp build_query(path, opts) do
     params = Enum.filter(opts, fn {_k, v} -> v != nil end)

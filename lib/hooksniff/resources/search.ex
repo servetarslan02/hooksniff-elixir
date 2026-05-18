@@ -6,7 +6,7 @@ defmodule HookSniff.Search do
   @doc "Search deliveries"
   @spec search(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
   def search(client, params \\ %{}) do
-    path = build_query("/api/v1/search", params)
+    path = build_query("/v1/search", params)
     Client.request(:get, path, nil, client)
   end
 

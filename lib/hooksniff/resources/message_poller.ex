@@ -6,17 +6,17 @@ defmodule HookSniff.MessagePoller do
   @doc "Poll for messages"
   @spec poll(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
   def poll(client, params \\ %{}) do
-    path = build_query("/api/v1/message-poller/poll", params)
+    path = build_query("/v1/message-poller/poll", params)
     Client.request(:get, path, nil, client)
   end
 
   @doc "Seek cursor"
   @spec seek(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
-  def seek(client, params), do: Client.request(:post, "/api/v1/message-poller/seek", params, client)
+  def seek(client, params), do: Client.request(:post, "/v1/message-poller/seek", params, client)
 
   @doc "Commit cursor"
   @spec commit(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
-  def commit(client, params), do: Client.request(:post, "/api/v1/message-poller/commit", params, client)
+  def commit(client, params), do: Client.request(:post, "/v1/message-poller/commit", params, client)
 
   defp build_query(path, params) when params == %{}, do: path
   defp build_query(path, params) do
