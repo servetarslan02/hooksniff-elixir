@@ -16,8 +16,9 @@ defmodule HookSniff.DefaultHttpAdapter do
     end
 
     case result do
-      {:ok, %HTTPoison.Response{status_code: status, body: resp_body}} ->
-        {:ok, %{status: status, body: resp_body}}
+      {:ok, %HTTPoison.Response{status_code: status, body: resp_body, headers: resp_headers}} ->
+        header_map = Map.new(resp_headers, fn {k, v} -> {String.downcase(k), v} end)
+        {:ok, %{status: status, body: resp_body, headers: header_map}}
       {:error, %HTTPoison.Error{reason: reason}} ->
         {:error, reason}
     end
@@ -94,11 +95,23 @@ defmodule HookSniff.Client do
   defp do_request_with_retry(method, url, headers, body, retries, timeout, adapter) do
     Enum.reduce_while(0..retries, nil, fn attempt, _acc ->
       if attempt > 0 do
-        # Exponential backoff: 50ms, 100ms, 200ms, ...
-        Process.sleep(50 * Integer.pow(2, attempt - 1))
+        # Exponential backoff: 1s, 2s, 4s, ...
+        Process.sleep(1000 * Integer.pow(2, attempt - 1))
       end
 
       case make_request(method, url, headers, body, timeout, adapter) do
+        {:ok, %{status: 429, headers: resp_headers} = resp} when attempt < retries ->
+          # 429 Rate Limit — respect Retry-After header
+          delay = case Map.get(resp_headers, "retry-after") do
+            nil -> 1000 * Integer.pow(2, attempt)
+            val -> case Integer.parse(val) do
+              {seconds, _} -> seconds * 1000
+              :error -> 1000 * Integer.pow(2, attempt)
+            end
+          end
+          Process.sleep(delay)
+          {:cont, {:error, resp}}
+
         {:ok, %{status: status} = resp} when status >= 500 and attempt < retries ->
           {:cont, {:error, resp}}
 

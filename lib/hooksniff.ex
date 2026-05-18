@@ -40,7 +40,7 @@ defmodule HookSniff do
     * `:api_key` — (required) Your API key or JWT token.
     * `:base_url` — Base URL of the HookSniff API (default: production).
     * `:timeout` — Request timeout in milliseconds (default: 30_000).
-    * `:num_retries` — Number of retries for 5xx errors (default: 2).
+    * `:num_retries` — Number of retries for 5xx errors (default: 3).
 
   ## Examples
 
@@ -54,7 +54,7 @@ defmodule HookSniff do
       api_key: api_key,
       base_url: Keyword.get(opts, :base_url, @default_base_url),
       timeout: Keyword.get(opts, :timeout, 30_000),
-      num_retries: Keyword.get(opts, :num_retries, 2),
+      num_retries: Keyword.get(opts, :num_retries, 3),
       http_adapter: Keyword.get(opts, :http_adapter, HookSniff.DefaultHttpAdapter)
     }
   end
