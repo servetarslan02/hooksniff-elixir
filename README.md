@@ -6,7 +6,7 @@
   <a href="https://github.com/servetarslan02/hooksniff-elixir/blob/main/LICENSE"><img src="https://img.shields.io/hexpm/l/hooksniff" alt="License"></a>
 </p>
 
-Official Elixir SDK for the [HookSniff](https://hooksniff.com) webhook delivery platform.
+Official Elixir SDK for the [HookSniff](https://hooksniff.vercel.app) webhook delivery platform.
 
 ## Installation
 
@@ -132,7 +132,7 @@ end
 - [Hex.pm](https://hex.pm/packages/hooksniff)
 - [Documentation](https://hexdocs.pm/hooksniff)
 - [GitHub](https://github.com/servetarslan02/hooksniff-elixir)
-- [HookSniff](https://hooksniff.com)
+- [HookSniff](https://hooksniff.vercel.app)
 
 ## License
 
