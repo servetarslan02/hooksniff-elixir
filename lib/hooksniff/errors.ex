@@ -106,6 +106,12 @@ defmodule HookSniff.ErrorFactory do
       502 -> %HookSniff.BadGatewayError{message: body, headers: headers}
       503 -> %HookSniff.ServiceUnavailableError{message: body, headers: headers}
       504 -> %HookSniff.GatewayTimeoutError{message: body, headers: headers}
+      408 -> %HookSniff.RequestTimeoutError{message: body, headers: headers}
+      410 -> %HookSniff.GoneError{message: body, headers: headers}
+      413 -> %HookSniff.PayloadTooLargeError{message: body, headers: headers}
+      501 -> %HookSniff.NotImplementedError{message: body, headers: headers}
+      507 -> %HookSniff.InsufficientStorageError{message: body, headers: headers}
+      508 -> %HookSniff.LoopDetectedError{message: body, headers: headers}
       _ -> %HookSniff.ApiError{status: status, body: body, headers: headers}
     end
   end
@@ -117,4 +123,58 @@ defmodule HookSniff.ErrorFactory do
       :error -> nil
     end
   end
+end
+
+defmodule HookSniff.RequestTimeoutError do
+  @moduledoc "408 Request Timeout — The server timed out waiting for the request"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Request timeout")
+end
+
+defmodule HookSniff.GoneError do
+  @moduledoc "410 Gone — The resource has been permanently removed"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Gone")
+end
+
+defmodule HookSniff.PayloadTooLargeError do
+  @moduledoc "413 Payload Too Large — The request body exceeds the limit"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Payload too large")
+end
+
+defmodule HookSniff.NotImplementedError do
+  @moduledoc "501 Not Implemented — The server does not support this functionality"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Not implemented")
+end
+
+defmodule HookSniff.InsufficientStorageError do
+  @moduledoc "507 Insufficient Storage — The server cannot store the representation"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Insufficient storage")
+end
+
+defmodule HookSniff.LoopDetectedError do
+  @moduledoc "508 Loop Detected — The server detected an infinite loop"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Loop detected")
+end
+
+defmodule HookSniff.TimeoutError do
+  @moduledoc "Timeout — request exceeded the configured timeout"
+  defexception [:message]
+  @impl true, do: def(message(%{message: m}), do: m || "Request timeout")
+end
+
+defmodule HookSniff.NetworkError do
+  @moduledoc "Network error — connection failed, DNS error, etc."
+  defexception [:message]
+  @impl true, do: def(message(%{message: m}), do: m || "Network error")
+end
+
+defmodule HookSniff.AuthenticationError do
+  @moduledoc "Authentication error — token invalid, expired, or missing"
+  defexception [:message, :headers]
+  @impl true, do: def(message(%{message: m}), do: m || "Authentication failed")
 end
