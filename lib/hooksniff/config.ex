@@ -13,7 +13,7 @@ defmodule HookSniff.Config do
   ## Usage
 
       config = HookSniff.Config.new(
-        server_url: "https://custom.hooksniff.com",
+        server_url: "https://hooksniff-api-1046140057667.europe-west1.run.app",
         timeout: 60_000,
         debug: true,
         headers: %{"x-custom" => "value"}
