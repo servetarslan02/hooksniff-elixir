@@ -5,16 +5,16 @@ defmodule HookSniff.Webhooks do
 
   @doc "Send a webhook"
   @spec send_webhook(HookSniff.t(), map()) :: {:ok, map()} | {:error, term()}
-  def send_webhook(client, params), do: Client.request(:post, "/v1/msg", params, client)
+  def send_webhook(client, params), do: Client.request(:post, "/v1/webhooks", params, client)
 
   @doc "Get a message by ID"
   @spec get_message(HookSniff.t(), String.t()) :: {:ok, map()} | {:error, term()}
-  def get_message(client, id), do: Client.request(:get, "/v1/msg/#{id}", nil, client)
+  def get_message(client, id), do: Client.request(:get, "/v1/webhooks/#{id}", nil, client)
 
   @doc "List messages (paginated). Accepts `:limit` and `:offset` opts."
   @spec list_messages(HookSniff.t(), keyword()) :: {:ok, map()} | {:error, term()}
   def list_messages(client, opts \\ []) do
-    path = build_query("/v1/msg", opts)
+    path = build_query("/v1/webhooks", opts)
     Client.request(:get, path, nil, client)
   end
 
