@@ -4,8 +4,8 @@ defmodule HookSniffAPI.Mixfile do
   def project do
     [
       app: :hooksniff,
-      version: "1.0.0",
-      elixir: "~> 1.18",
+      version: "1.1.1",
+      elixir: "~> 1.14",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -48,6 +48,8 @@ defmodule HookSniffAPI.Mixfile do
       [
         name: "hooksniff",
         files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
+        licenses: ["MIT"],
+        links: %{"GitHub" => "https://github.com/servetarslan02/hooksniff-elixir"}
       ]
   end
 end
