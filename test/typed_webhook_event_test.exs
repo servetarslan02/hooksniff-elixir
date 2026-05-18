@@ -129,4 +129,76 @@ defmodule HookSniff.TypedWebhookEventTest do
       assert data.app_uid == "u1"
     end
   end
+
+  describe "all endpoint event types" do
+    test "parses all 5 endpoint events" do
+      events = [
+        "endpoint.created",
+        "endpoint.updated",
+        "endpoint.deleted",
+        "endpoint.enabled",
+        "endpoint.disabled"
+      ]
+
+      for event_type <- events do
+        event = WebhookEvent.parse(%{
+          "event" => event_type,
+          "data" => %{"appId" => "a1", "endpointId" => "e1"},
+          "timestamp" => ""
+        })
+        assert event.event == event_type
+      end
+    end
+  end
+
+  describe "edge cases" do
+    test "empty data" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "data" => %{},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_created_data(event)
+      assert data.app_id == ""
+    end
+
+    test "missing data key" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_created_data(event)
+      assert data.app_id == ""
+    end
+
+    test "unicode data" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "data" => %{"appId" => "ünïcödé", "endpointId" => "日本語"},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_created_data(event)
+      assert data.app_id == "ünïcödé"
+      assert data.endpoint_id == "日本語"
+    end
+
+    test "extra fields ignored" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "data" => %{"appId" => "a1", "endpointId" => "e1", "extra" => "ignored"},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_created_data(event)
+      assert data.app_id == "a1"
+    end
+
+    test "nil data" do
+      event = WebhookEvent.parse(%{
+        "event" => "test",
+        "data" => nil,
+        "timestamp" => ""
+      })
+      assert event.data == nil
+    end
+  end
 end
