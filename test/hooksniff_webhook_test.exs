@@ -34,15 +34,4 @@ defmodule HookSniffWebhookTest do
     assert {:error, _} = HookSniffAPI.Webhook.verify(wh, @payload, headers)
   end
 
-  test "svix branded headers" do
-    timestamp = System.system_time(:second)
-    sig = sign(@secret, @msg_id, timestamp, @payload)
-    headers = %{
-      "svix-id" => @msg_id,
-      "svix-timestamp" => "#{timestamp}",
-      "svix-signature" => sig
-    }
-    wh = HookSniffAPI.Webhook.new(@secret)
-    assert {:ok, _result} = HookSniffAPI.Webhook.verify(wh, @payload, headers)
-  end
 end

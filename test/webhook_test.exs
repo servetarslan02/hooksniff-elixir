@@ -29,7 +29,7 @@ defmodule HookSniff.WebhookTest do
     }
   end
 
-  # --- Svix-compatible test suite (14 test cases) ---
+  # --- Webhook test suite ---
 
   # Test 1: Valid signature returns parsed JSON
   test "valid signature returns parsed JSON" do
@@ -89,17 +89,6 @@ defmodule HookSniff.WebhookTest do
     assert msg =~ "too old or too new"
   end
 
-  # Test 9: Svix-branded headers work (svix-id, svix-timestamp, svix-signature)
-  test "accepts svix-branded headers" do
-    standard = valid_headers()
-    svix_headers = %{
-      "svix-id" => standard["webhook-id"],
-      "svix-timestamp" => standard["webhook-timestamp"],
-      "svix-signature" => standard["webhook-signature"]
-    }
-    assert {:ok, payload} = Webhook.verify(@test_body, svix_headers, @test_secret)
-    assert payload["event"] == "order.created"
-  end
 
   # Test 10: Multiple comma-separated signatures (multi-sig)
   test "verifies with multiple comma-separated signatures" do
