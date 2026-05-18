@@ -200,5 +200,76 @@ defmodule HookSniff.TypedWebhookEventTest do
       })
       assert event.data == nil
     end
+
+    test "large data" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "data" => %{"appId" => String.duplicate("a", 10000), "endpointId" => String.duplicate("e", 10000)},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_created_data(event)
+      assert String.length(data.app_id) == 10000
+    end
+
+    test "special characters" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "data" => %{"appId" => "a@b.c", "endpointId" => "e#1"},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_created_data(event)
+      assert data.app_id == "a@b.c"
+    end
+
+    test "trigger none" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.disabled",
+        "data" => %{"appId" => "a", "endpointId" => "e", "trigger" => "none"},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_disabled_data(event)
+      assert data.trigger == "none"
+    end
+
+    test "trigger first-failure" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.disabled",
+        "data" => %{"appId" => "a", "endpointId" => "e", "trigger" => "first-failure"},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_disabled_data(event)
+      assert data.trigger == "first-failure"
+    end
+
+    test "fail_since" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.disabled",
+        "data" => %{"appId" => "a", "endpointId" => "e", "failSince" => "2026-01"},
+        "timestamp" => ""
+      })
+      data = WebhookEvent.parse_endpoint_disabled_data(event)
+      assert data.fail_since == "2026-01"
+    end
+
+    test "all endpoint types" do
+      for type <- ["endpoint.created", "endpoint.updated", "endpoint.deleted", "endpoint.enabled", "endpoint.disabled"] do
+        event = WebhookEvent.parse(%{"event" => type, "data" => %{"appId" => "a"}, "timestamp" => ""})
+        assert event.event == type
+      end
+    end
+
+    test "get returns nil for typed structs" do
+      event = WebhookEvent.parse(%{
+        "event" => "endpoint.created",
+        "data" => %{"appId" => "a1"},
+        "timestamp" => "t"
+      })
+      assert WebhookEvent.get(event, "appId") == nil
+    end
+
+    test "event_type returns event name" do
+      event = WebhookEvent.parse(%{"event" => "test", "data" => %{}, "timestamp" => ""})
+      assert WebhookEvent.event_type(event) == "test"
+    end
   end
 end
