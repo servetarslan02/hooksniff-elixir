@@ -98,6 +98,7 @@ defmodule HookSniff.Client do
       {"accept", "application/json"},
       {"authorization", "Bearer #{client.api_key}"},
       {"user-agent", @user_agent},
+      {"x-hooksniff-sdk", @user_agent},
       {"idempotency-key", generate_idempotency_key()}
     ]
   end
