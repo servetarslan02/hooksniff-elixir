@@ -41,7 +41,7 @@ defmodule HookSniff.Webhook do
     * `{:error, %VerificationError{}}` if verification fails
   """
   @spec verify(String.t(), map(), String.t() | binary()) ::
-          {:ok, term()} | {:error, VerificationError.t()}
+          {:ok, HookSniff.WebhookEvent.t()} | {:error, VerificationError.t()}
   def verify(payload, headers, secret) when is_binary(payload) do
     normalized = normalize_headers(headers)
 
@@ -56,7 +56,38 @@ defmodule HookSniff.Webhook do
       expected = "v1,#{Base.encode64(expected_sig)}"
 
       if verify_signature(expected, signature) do
-        parse_payload(payload)
+        parse_payload_event(payload)
+      else
+        {:error, %VerificationError{message: "Invalid webhook signature"}}
+      end
+    end
+  end
+
+  @doc """
+  Verify a webhook payload and return the raw parsed JSON (without wrapping in WebhookEvent).
+
+  ## Returns
+
+    * `{:ok, parsed_map}` if verification succeeds
+    * `{:error, %VerificationError{}}` if verification fails
+  """
+  @spec verify_raw(String.t(), map(), String.t() | binary()) ::
+          {:ok, map()} | {:error, VerificationError.t()}
+  def verify_raw(payload, headers, secret) when is_binary(payload) do
+    normalized = normalize_headers(headers)
+
+    with {:ok, msg_id} <- get_header(normalized, "webhook-id"),
+         {:ok, timestamp} <- get_header(normalized, "webhook-timestamp"),
+         {:ok, signature} <- get_header(normalized, "webhook-signature"),
+         :ok <- validate_timestamp(timestamp),
+         {:ok, secret_bytes} <- decode_secret(secret) do
+      ts = String.to_integer(timestamp)
+      content = "#{msg_id}.#{ts}.#{payload}"
+      expected_sig = compute_hmac(secret_bytes, content)
+      expected = "v1,#{Base.encode64(expected_sig)}"
+
+      if verify_signature(expected, signature) do
+        parse_payload_raw(payload)
       else
         {:error, %VerificationError{message: "Invalid webhook signature"}}
       end
@@ -166,10 +197,22 @@ defmodule HookSniff.Webhook do
     end)
   end
 
-  defp parse_payload(payload) do
+  defp parse_payload_event(payload) do
     case Jason.decode(payload) do
-      {:ok, parsed} -> {:ok, parsed}
-      {:error, _} -> {:ok, payload}
+      {:ok, parsed} when is_map(parsed) ->
+        {:ok, HookSniff.WebhookEvent.parse(parsed)}
+      {:ok, _} ->
+        {:ok, HookSniff.WebhookEvent.parse(%{})}
+      {:error, _} ->
+        {:ok, HookSniff.WebhookEvent.parse(%{})}
+    end
+  end
+
+  defp parse_payload_raw(payload) do
+    case Jason.decode(payload) do
+      {:ok, parsed} when is_map(parsed) -> {:ok, parsed}
+      {:ok, _} -> {:ok, %{}}
+      {:error, _} -> {:ok, %{}}
     end
   end
 end
