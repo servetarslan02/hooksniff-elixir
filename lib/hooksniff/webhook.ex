@@ -3,15 +3,17 @@ defmodule HookSniff.Webhook do
   Webhook signature verification for incoming HookSniff webhooks.
 
   Verifies HMAC-SHA256 signatures in Standard Webhooks format.
+  Supports both HookSniff-branded (`hooksniff-id`, `hooksniff-timestamp`, `hooksniff-signature`)
+  and Standard Webhooks (`webhook-id`, `webhook-timestamp`, `webhook-signature`) headers.
   Supports `whsec_` prefixed secrets and replay protection (5-minute tolerance).
 
   ## Usage
 
       secret = "whsec_base64encoded..."
       headers = %{
-        "webhook-id" => "msg_123",
-        "webhook-timestamp" => "1678900000",
-        "webhook-signature" => "v1,abc123..."
+        "hooksniff-id" => "msg_123",
+        "hooksniff-timestamp" => "1678900000",
+        "hooksniff-signature" => "v1,abc123..."
       }
       body = ~s({"event": "order.created"})
 
@@ -31,8 +33,8 @@ defmodule HookSniff.Webhook do
   ## Parameters
 
     * `payload` — The raw request body (string)
-    * `headers` — Map with `webhook-id`, `webhook-timestamp`, `webhook-signature` keys
-      (also accepts `webhook-id`, `webhook-timestamp`, `webhook-signature`)
+    * `headers` — Map with `hooksniff-id`, `hooksniff-timestamp`, `hooksniff-signature` keys
+      (also accepts Standard Webhooks: `webhook-id`, `webhook-timestamp`, `webhook-signature`)
     * `secret` — The endpoint's signing secret (e.g., `"whsec_..."`)
 
   ## Returns
@@ -45,9 +47,9 @@ defmodule HookSniff.Webhook do
   def verify(payload, headers, secret) when is_binary(payload) do
     normalized = normalize_headers(headers)
 
-    with {:ok, msg_id} <- get_header(normalized, "webhook-id"),
-         {:ok, timestamp} <- get_header(normalized, "webhook-timestamp"),
-         {:ok, signature} <- get_header(normalized, "webhook-signature"),
+    with {:ok, msg_id} <- get_header_branded(normalized, "webhook-id"),
+         {:ok, timestamp} <- get_header_branded(normalized, "webhook-timestamp"),
+         {:ok, signature} <- get_header_branded(normalized, "webhook-signature"),
          :ok <- validate_timestamp(timestamp),
          {:ok, secret_bytes} <- decode_secret(secret) do
       ts = String.to_integer(timestamp)
@@ -76,9 +78,9 @@ defmodule HookSniff.Webhook do
   def verify_raw(payload, headers, secret) when is_binary(payload) do
     normalized = normalize_headers(headers)
 
-    with {:ok, msg_id} <- get_header(normalized, "webhook-id"),
-         {:ok, timestamp} <- get_header(normalized, "webhook-timestamp"),
-         {:ok, signature} <- get_header(normalized, "webhook-signature"),
+    with {:ok, msg_id} <- get_header_branded(normalized, "webhook-id"),
+         {:ok, timestamp} <- get_header_branded(normalized, "webhook-timestamp"),
+         {:ok, signature} <- get_header_branded(normalized, "webhook-signature"),
          :ok <- validate_timestamp(timestamp),
          {:ok, secret_bytes} <- decode_secret(secret) do
       ts = String.to_integer(timestamp)
@@ -125,6 +127,15 @@ defmodule HookSniff.Webhook do
   defp get_header(headers, name) do
     case Map.get(headers, name) do
       nil -> {:error, %VerificationError{message: "Missing #{name} header"}}
+      value -> {:ok, value}
+    end
+  end
+
+  # Branded header fallback: try hooksniff-* first, then webhook-* (Standard Webhooks)
+  defp get_header_branded(headers, standard_name) do
+    branded_name = String.replace(standard_name, "webhook-", "hooksniff-")
+    case Map.get(headers, branded_name) do
+      nil -> get_header(headers, standard_name)
       value -> {:ok, value}
     end
   end
