@@ -7,7 +7,7 @@
 # General application configuration
 import Config
 
-config :hooksniff, base_url: "https://hooksniff-api-1046140057667.europe-west1.run.app"
+config :hooksniff, base_url: "https://hooksniff-api-e6ztf3x2ma-ew.a.run.app/v1"
 
 # Import environment specific config. This must remain at the bottom
 # of this file so it overrides the configuration defined above.

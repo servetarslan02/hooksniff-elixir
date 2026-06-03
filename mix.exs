@@ -4,8 +4,8 @@ defmodule HookSniffAPI.Mixfile do
   def project do
     [
       app: :hooksniff,
-      version: "1.2.1",
-      elixir: "~> 1.14",
+      version: "1.0.0",
+      elixir: "~> 1.18",
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
@@ -36,11 +36,8 @@ defmodule HookSniffAPI.Mixfile do
   defp deps do
     [
       {:tesla, "~> 1.14"},
-      {:httpoison, "~> 2.0"},
-      {:jason, "~> 1.4"},
       {:ex_doc, "~> 0.37.3", only: :dev, runtime: false},
-      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false},
-      {:mox, "~> 1.1", only: :test}
+      {:dialyxir, "~> 1.4", only: [:dev, :test], runtime: false}
     ]
   end
 
@@ -48,8 +45,6 @@ defmodule HookSniffAPI.Mixfile do
       [
         name: "hooksniff",
         files: ~w(.formatter.exs config lib mix.exs README* LICENSE*),
-        licenses: ["MIT"],
-        links: %{"GitHub" => "https://github.com/servetarslan02/hooksniff-elixir"}
       ]
   end
 end
