@@ -9,9 +9,7 @@ defmodule HookSniffAPI.Mixfile do
       build_embedded: Mix.env() == :prod,
       start_permanent: Mix.env() == :prod,
       package: package(),
-      description: """
-      Webhook delivery, monitoring, and management API. All endpoints under &#x60;/v1&#x60; require authentication via &#x60;Authorization: Bearer &lt;api_key&gt;&#x60; header unless marked as **Public**. 
-      """,
+      description: "HookSniff webhook delivery platform Elixir SDK",
       deps: deps()
     ]
   end
