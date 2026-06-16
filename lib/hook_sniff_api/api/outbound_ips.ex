@@ -19,10 +19,10 @@ defmodule HookSniffAPI.Api.OutboundIPs do
 
   ### Returns
 
-  - `{:ok, HookSniffAPI.Model.OutboundIpsResponse.t}` on success
+  - `{:ok, HookSniffAPI.Model.OutboundIPsResponse.t}` on success
   - `{:error, Tesla.Env.t}` on failure
   """
-  @spec outbound_ips_get(Tesla.Env.client, keyword()) :: {:ok, HookSniffAPI.Model.OutboundIpsResponse.t} | {:error, Tesla.Env.t}
+  @spec outbound_ips_get(Tesla.Env.client, keyword()) :: {:ok, HookSniffAPI.Model.OutboundIPsResponse.t} | {:error, Tesla.Env.t}
   def outbound_ips_get(connection, _opts \\ []) do
     request =
       %{}
@@ -33,7 +33,7 @@ defmodule HookSniffAPI.Api.OutboundIPs do
     connection
     |> Connection.request(request)
     |> evaluate_response([
-      {200, HookSniffAPI.Model.OutboundIpsResponse}
+      {200, HookSniffAPI.Model.OutboundIPsResponse}
     ])
   end
 end
